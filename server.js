@@ -1,29 +1,36 @@
-const sqlite3 = require('sqlite3')
-const { open } = require('sqlite')
+const express = require('express')
+const { criarBanco } = require('./database')
 
-const criarBanco = async () => {
-    const db = await open({
-        filename: './database.db',
-        driver: sqlite3.Database      
+const app = express()
 
-    })
 
-    await db.exec(`CREATE TABLE IF NOT EXISTS incidantes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        titulo TEXT,
-        tipo_problema TEXT,           -- O que aconteceu (Buraco, Lixo, Luz, etc)
-        localizacao TEXT,             -- Onde aconteceu (Rua, Bairro, Referencia)
-        prioridade TEXT,              -- Baixa, Média, Alta, Urgência
-        descricao TEXT,               -- Detalhes do problema
-        data_registro TEXT,           -- Data de Registro do problema
-        hora_registro TEXT,           -- Hora de Registro do problema
-        nome_solicitante TEXT,        -- Nome do Solicitante
-        contato_solicitante TEXT,     -- Contato do Solicitante (Telefone ou Email)
-        status_resolucao TEXT DEFAULT 'Pendente' -- Se não avisarem o status, banco define como pendente
-        )
+app.use(express.json()) // Habilita o Express para entender requisições com corpo em JSON
+
+app.get('/', (req, res) => {
+    res.send(`
+        <body>
+        <head>
+        <title>Zelacidade - Gestão de Problemas Urbanos</title>
+        </head>
+        <h1>Bem vindo ao Zelacidade!</h1>
+        <h2>Gestão de Problemas Urbanos</h2>
+        <p>Endpoint que leva aos incidentes cadastrados: /incidentes</p>
+        <button onclick="window.location.href='/incidentes'">Ver Incidentes</button>
+        
+        </body>
         `)
 
-        console.log('Banco de dados configurado: A tabela de incidentes foi criada com sucesso!')
+    
+})
 
-}
-criarBanco()
+app.get('/incidentes', async (req, res) => {
+    const db = await criarBanco() // Acessa o Banco de Dados
+    const incidentes = await db.all(`SELECT * FROM incidentes`) // Consulta SQL para selecionar todos os incidentes
+    res.json(incidentes) // Envia 
+})
+
+const PORT = 3000
+app.listen(PORT, async () => {
+    console.log(`Servidor rodando na porta http://localhost:${PORT}`)
+
+})

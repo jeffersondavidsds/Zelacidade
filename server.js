@@ -57,3 +57,30 @@ app.get('/incidentes/:id', async (req, res) => {
     res.send(`Incidente novo registrado: ${tipo_problema} no nome de ${nome_solicitante} Telefone ${contato_solicitante} na data ${data_registro} e na hora ${hora_registro} - ${imagem_problema}`)
     
 })
+
+//ROTA DE ATUALIZAÇÃO: Define uma rota do tipo PUT para endpoint '/incidentes/:id' para atualizar um incidente específico com base no ID fornecido
+
+app.put('/incidentes/:id', async (req, res) => {
+    //Pega o ID do incidente a ser atualizado a partir dos parâmetros da URL e os dados atualizados do corpo da requisição
+    const { id } = req.params
+    const { descricao, prioridade, status_resolucao, imagem_problema } = req.body
+
+    const db = await criarBanco()
+    await db.run(`UPDATE incidentes
+        SET descricao = ?, prioridade = ?, status_resolucao = ?, imagem_problema = ?
+        WHERE id = ?`, [descricao, prioridade, status_resolucao, imagem_problema, id])
+
+    res.send(`Incidente com ID ${id} atualizado com sucesso!`)
+
+
+})
+
+
+//ROTA DE REMOÇÃO: Define uma rota do tipo DELETE para endpoint '/incidentes/:id'
+
+app.delete('/incidentes/:id', async (req, res) => {
+    const { id } = req.params
+    const db = await criarBanco()
+    await db.run(`DELETE FROM incidentes WHERE id = ?`, [id])
+    res.send(`Incidentes com ID ${id} deletado com sucesso!`)
+})

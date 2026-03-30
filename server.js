@@ -1,10 +1,16 @@
 const express = require('express')
-const { criarBanco } = require('./database')
-
+const { criarBanco } = require('./database')// A nossa "chave" que abre a conexão
+const cors = require('cors') // Importa o módulo CORS para lidar com requisições de diferentes orientações
 const app = express()
 
-
 app.use(express.json()) // Habilita o Express para entender requisições com corpo em JSON
+
+//ativando o CORS no nosso servidor
+//O comando app.use(cors()) avisa o navegador:
+//"Pode liberar o acesso para qualquer site que queira consultar meus dados"
+app.use(cors())
+
+
 
 app.get('/', (req, res) => {
     res.send(`
@@ -29,13 +35,6 @@ app.get('/incidentes', async (req, res) => {
     const incidentes = await db.all(`SELECT * FROM incidentes`) // Consulta SQL para selecionar todos os incidentes
     res.json(incidentes) // Envia 
 })
-
-const PORT = 3000
-app.listen(PORT, async () => {
-    console.log(`Servidor rodando na porta http://localhost:${PORT}`)
-
-})
-
 
 app.get('/incidentes/:id', async (req, res) => {
     const { id } = req.params
@@ -83,4 +82,14 @@ app.delete('/incidentes/:id', async (req, res) => {
     const db = await criarBanco()
     await db.run(`DELETE FROM incidentes WHERE id = ?`, [id])
     res.send(`Incidentes com ID ${id} deletado com sucesso!`)
+})
+
+
+//Define a porta onde o servidor vai rodar
+const PORT = process.env.PORT || 3000
+
+
+app.listen(PORT, async () => {
+    console.log(`Servidor rodando na porta http://localhost:${PORT}`)
+
 })
